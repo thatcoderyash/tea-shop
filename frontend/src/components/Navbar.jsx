@@ -1,33 +1,51 @@
 import { useCart } from "../context/CartContext";
 
-const Navbar = ({ onCartClick }) => {
+function Navbar({ onCartClick }) {
   const { cartCount } = useCart();
 
   return (
-    <header>
-      <nav>
-        <div className="logo">
+    <header className="header">
+      <div className="wrapper">
+        <a className="brand" href="#home">
           <img src="/images/logo.png" alt="Mistvale Tea Co." />
-        </div>
+        </a>
 
-        <div className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#shop">Shop</a>
-          <a href="#about">About</a>
-          <a href="#faq">FAQ</a>
-        </div>
+        <nav className="nav">
+          <a href="#home" className="active">
+            HOME
+          </a>
 
-        <div className="nav-actions">
-          <button>Search</button>
+          <a href="#shop">SHOP</a>
 
-          <button onClick={onCartClick}>
-            Cart
-            {cartCount > 0 && ` (${cartCount})`}
+          <a href="#about">ABOUT</a>
+
+          <a href="#contact">CONTACT</a>
+        </nav>
+
+        <div className="header-actions">
+          <form
+            className="search-form"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <input
+              className="search"
+              type="search"
+              placeholder="Search teas..."
+            />
+          </form>
+
+          <button
+            className="cart-icon"
+            onClick={onCartClick}
+            aria-label="Open shopping cart"
+          >
+            🛒
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </button>
         </div>
-      </nav>
+      </div>
     </header>
   );
-};
+}
 
 export default Navbar;

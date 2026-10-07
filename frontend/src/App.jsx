@@ -5,6 +5,7 @@ import Hero from "./components/Hero";
 import ProductSection from "./components/ProductSection";
 import CartDrawer from "./components/CartDrawer";
 import Checkout from "./components/Checkout";
+import TrustStrip from "./components/TrustStrip";
 
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -26,6 +27,8 @@ function App() {
       {!checkoutOpen ? (
         <>
           <Hero />
+
+          <TrustStrip />
 
           <ProductSection />
 
