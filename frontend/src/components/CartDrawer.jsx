@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
-const CartDrawer = ({ isOpen, onClose }) => {
+const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [pincodeMessage, setPincodeMessage] = useState("");
 
   const {
     cart,
@@ -23,6 +25,36 @@ const CartDrawer = ({ isOpen, onClose }) => {
   if (!isOpen) {
     return null;
   }
+
+  const checkPincode = () => {
+    const trimmedPincode = pincode.trim();
+
+    if (!/^\d{6}$/.test(trimmedPincode)) {
+      setPincodeMessage("Please enter a valid 6-digit pincode.");
+      return;
+    }
+
+    const serviceablePincodes = [
+      "110001",
+      "110002",
+      "122001",
+      "160001",
+      "201301",
+      "302001",
+      "400001",
+      "411001",
+      "500001",
+      "560001",
+      "600001",
+      "700001",
+    ];
+
+    if (serviceablePincodes.includes(trimmedPincode)) {
+      setPincodeMessage("Delivery is available to this pincode.");
+    } else {
+      setPincodeMessage("Sorry, we don't deliver to this pincode yet.");
+    }
+  };
 
   return (
     <div className="cart-overlay" onClick={onClose}>
@@ -101,6 +133,30 @@ const CartDrawer = ({ isOpen, onClose }) => {
                 <span>{shippingCost === 0 ? "FREE" : `₹${shippingCost}`}</span>
               </div>
 
+              <div className="pincode-section">
+                <h3>Check delivery</h3>
+
+                <div className="pincode-input">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength="6"
+                    placeholder="Enter pincode"
+                    value={pincode}
+                    onChange={(event) => {
+                      setPincode(event.target.value);
+                      setPincodeMessage("");
+                    }}
+                  />
+
+                  <button onClick={checkPincode}>Check</button>
+                </div>
+
+                {pincodeMessage && (
+                  <p className="pincode-message">{pincodeMessage}</p>
+                )}
+              </div>
+
               <div className="coupon-section">
                 <h3>Have a coupon?</h3>
 
@@ -154,7 +210,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
                 <strong>₹{finalTotal}</strong>
               </div>
 
-              <button className="checkout-btn">Proceed to Checkout</button>
+              <button className="checkout-btn" onClick={onCheckout}>
+                Proceed to Checkout
+              </button>
             </div>
           </>
         )}
