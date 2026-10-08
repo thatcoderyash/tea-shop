@@ -1,21 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
-import products from "../data/products";
 
 function ProductSection() {
+  const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("featured");
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const categories = ["All", "Black", "Green", "Herbal", "Gifts"];
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/products")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError("Unable to load products. Please try again.");
+        setLoading(false);
+      });
+  }, []);
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
+      selectedCategory === "All" ||
+      product.category === selectedCategory;
+
+    const search = searchTerm.toLowerCase();
 
     const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      product.name.toLowerCase().includes(search) ||
+      product.description.toLowerCase().includes(search) ||
+      product.category.toLowerCase().includes(search);
 
     return matchesCategory && matchesSearch;
   });
@@ -40,14 +67,38 @@ function ProductSection() {
     }
   });
 
+  if (loading) {
+    return (
+      <section id="shop" className="products-section">
+        <div className="section-header">
+          <p>OUR COLLECTION</p>
+          <h2>Find Your Perfect Tea</h2>
+          <p>Loading our teas...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="shop" className="products-section">
+        <div className="section-header">
+          <p>OUR COLLECTION</p>
+          <h2>Find Your Perfect Tea</h2>
+          <p>{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="shop" className="products-section">
       <div className="section-header">
         <p>OUR COLLECTION</p>
-
         <h2>Find Your Perfect Tea</h2>
-
-        <p>Explore our carefully selected collection of premium teas.</p>
+        <p>
+          Explore our carefully selected collection of premium teas.
+        </p>
       </div>
 
       <div className="product-toolbar">
@@ -82,7 +133,9 @@ function ProductSection() {
           <button
             key={category}
             className={
-              selectedCategory === category ? "filter-btn active" : "filter-btn"
+              selectedCategory === category
+                ? "filter-btn active"
+                : "filter-btn"
             }
             onClick={() => setSelectedCategory(category)}
           >
@@ -94,7 +147,10 @@ function ProductSection() {
       {sortedProducts.length > 0 ? (
         <div className="products-grid">
           {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+            />
           ))}
         </div>
       ) : (
