@@ -798,6 +798,31 @@ textarea {
   overflow-y: auto;
 }
 
+.continue-shopping-btn {
+  width: 100%;
+  padding: 13px 18px;
+  margin-top: 10px;
+
+  background: transparent;
+  color: var(--tea-green);
+  border: 1px solid var(--tea-green);
+  border-radius: 3px;
+
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.continue-shopping-btn:hover {
+  background: var(--tea-green);
+  color: var(--cream);
+}
+
 .cart-header {
   display: flex;
   align-items: center;

@@ -83,7 +83,7 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
 
             <p>Add some beautiful tea and come back here.</p>
 
-            <button className="continue-shopping" onClick={onClose}>
+            <button className="continue-shopping-btn" onClick={onClose}>
               Continue Shopping
             </button>
           </div>
