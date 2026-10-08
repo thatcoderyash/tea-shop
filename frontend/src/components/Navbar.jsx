@@ -1,7 +1,75 @@
+import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 
 function Navbar({ onCartClick }) {
   const { cartCount } = useCart();
+  const [activeSection, setActiveSection] = useState("home");
+
+  useEffect(() => {
+    const sections = [
+      document.getElementById("home"),
+      document.getElementById("shop"),
+      document.getElementById("about"),
+      document.getElementById("contact"),
+    ].filter(Boolean);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleSections = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visibleSections.length > 0) {
+          setActiveSection(visibleSections[0].target.id);
+        }
+      },
+      {
+        root: null,
+        threshold: [0.2, 0.4, 0.6],
+        rootMargin: "-90px 0px -35% 0px",
+      },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const navItems = [
+    {
+      label: "HOME",
+      target: "home",
+    },
+    {
+      label: "SHOP",
+      target: "shop",
+    },
+    {
+      label: "ABOUT",
+      target: "about",
+    },
+    {
+      label: "CONTACT",
+      target: "contact",
+    },
+  ];
+
+  const handleNavigation = (event, target) => {
+    event.preventDefault();
+
+    const section = document.getElementById(target);
+
+    if (!section) {
+      return;
+    }
+
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   return (
     <header className="header">
@@ -10,16 +78,17 @@ function Navbar({ onCartClick }) {
           <img src="/images/logo.png" alt="Mistvale Tea Co." />
         </a>
 
-        <nav className="nav">
-          <a href="#home" className="active">
-            HOME
-          </a>
-
-          <a href="#shop">SHOP</a>
-
-          <a href="#about">ABOUT</a>
-
-          <a href="#contact">CONTACT</a>
+        <nav className="nav" aria-label="Main navigation">
+          {navItems.map((item) => (
+            <a
+              key={item.target}
+              href={`#${item.target}`}
+              className={activeSection === item.target ? "active" : ""}
+              onClick={(event) => handleNavigation(event, item.target)}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
 
         <div className="header-actions">
