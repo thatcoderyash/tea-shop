@@ -15,6 +15,11 @@ export function CartProvider({ children }) {
     localStorage.setItem("mistvale-cart", JSON.stringify(cart));
   }, [cart]);
 
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("mistvale-cart");
+  };
+
   const addToCart = (product) => {
     setCart((currentCart) => {
       const existingProduct = currentCart.find(
@@ -154,6 +159,7 @@ export function CartProvider({ children }) {
         finalTotal,
         applyCoupon,
         removeCoupon,
+        clearCart,
       }}
     >
       {children}

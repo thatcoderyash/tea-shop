@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 
-function Navbar({ onCartClick }) {
+function Navbar({ onCartClick, checkoutOpen }) {
   const { cartCount } = useCart();
   const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
+    // Storefront sections are unmounted during checkout.
+    // Wait until they are mounted again before observing them.
+    if (checkoutOpen) return;
+
     const sections = [
       document.getElementById("home"),
       document.getElementById("shop"),
@@ -35,7 +39,7 @@ function Navbar({ onCartClick }) {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [checkoutOpen]);
 
   const navItems = [
     {
@@ -64,6 +68,8 @@ function Navbar({ onCartClick }) {
     if (!section) {
       return;
     }
+
+    setActiveSection(target);
 
     section.scrollIntoView({
       behavior: "smooth",

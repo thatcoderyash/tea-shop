@@ -28,7 +28,10 @@ function App() {
 
   return (
     <>
-      <Navbar onCartClick={() => setCartOpen(true)} />
+      <Navbar
+        onCartClick={() => setCartOpen(true)}
+        checkoutOpen={checkoutOpen}
+      />
 
       {!checkoutOpen ? (
         <>

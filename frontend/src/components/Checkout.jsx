@@ -2,8 +2,15 @@ import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
 function Checkout({ onClose }) {
-  const { cart, cartCount, cartTotal, shippingCost, discount, finalTotal } =
-    useCart();
+  const {
+    cart,
+    cartCount,
+    cartTotal,
+    shippingCost,
+    discount,
+    finalTotal,
+    clearCart,
+  } = useCart();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -16,6 +23,9 @@ function Checkout({ onClose }) {
   });
 
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [orderId, setOrderId] = useState(null);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -24,12 +34,70 @@ function Checkout({ onClose }) {
       ...current,
       [name]: value,
     }));
+
+    if (error) setError("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    setOrderPlaced(true);
+    if (cart.length === 0) {
+      setError("Your cart is empty. Please add some tea first.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+
+    const orderRequest = {
+      customerName: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      address: formData.address.trim(),
+      city: formData.city.trim(),
+      state: formData.state.trim(),
+      pincode: formData.pincode.trim(),
+
+      // The backend validates the coupon and calculates the final total.
+      couponCode: discount > 0 ? "WELCOME10" : null,
+
+      items: cart.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+      })),
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderRequest),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            data.message ||
+            data.title ||
+            "Unable to place your order. Please try again.",
+        );
+      }
+
+      setOrderId(data.id);
+      setOrderPlaced(true);
+      clearCart();
+    } catch (err) {
+      setError(
+        err.message ||
+          "Could not connect to the server. Please check that the backend is running.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (orderPlaced) {
@@ -44,6 +112,8 @@ function Checkout({ onClose }) {
 
           <p>Your order has been received successfully.</p>
 
+          {orderId && <p>Order number: #{orderId}</p>}
+
           <button onClick={onClose}>Continue Shopping</button>
         </div>
       </div>
@@ -53,7 +123,9 @@ function Checkout({ onClose }) {
   return (
     <div className="checkout-page">
       <div className="checkout-header">
-        <button onClick={onClose}>← Back to Cart</button>
+        <button type="button" onClick={onClose}>
+          ← Back to Cart
+        </button>
 
         <h1>Checkout</h1>
       </div>
@@ -65,11 +137,11 @@ function Checkout({ onClose }) {
 
             <div className="form-group">
               <label htmlFor="name">Full Name</label>
-
               <input
                 id="name"
                 name="name"
                 type="text"
+                maxLength={100}
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -79,11 +151,11 @@ function Checkout({ onClose }) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="email">Email</label>
-
                 <input
                   id="email"
                   name="email"
                   type="email"
+                  maxLength={150}
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -92,11 +164,11 @@ function Checkout({ onClose }) {
 
               <div className="form-group">
                 <label htmlFor="phone">Phone</label>
-
                 <input
                   id="phone"
                   name="phone"
                   type="tel"
+                  maxLength={20}
                   value={formData.phone}
                   onChange={handleChange}
                   required
@@ -110,10 +182,10 @@ function Checkout({ onClose }) {
 
             <div className="form-group">
               <label htmlFor="address">Address</label>
-
               <textarea
                 id="address"
                 name="address"
+                maxLength={300}
                 value={formData.address}
                 onChange={handleChange}
                 rows="3"
@@ -124,11 +196,11 @@ function Checkout({ onClose }) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="city">City</label>
-
                 <input
                   id="city"
                   name="city"
                   type="text"
+                  maxLength={100}
                   value={formData.city}
                   onChange={handleChange}
                   required
@@ -137,11 +209,11 @@ function Checkout({ onClose }) {
 
               <div className="form-group">
                 <label htmlFor="state">State</label>
-
                 <input
                   id="state"
                   name="state"
                   type="text"
+                  maxLength={100}
                   value={formData.state}
                   onChange={handleChange}
                   required
@@ -151,13 +223,13 @@ function Checkout({ onClose }) {
 
             <div className="form-group">
               <label htmlFor="pincode">Pincode</label>
-
               <input
                 id="pincode"
                 name="pincode"
                 type="text"
                 inputMode="numeric"
-                maxLength="6"
+                pattern="[0-9]{6}"
+                maxLength={6}
                 value={formData.pincode}
                 onChange={handleChange}
                 required
@@ -165,8 +237,18 @@ function Checkout({ onClose }) {
             </div>
           </section>
 
-          <button className="place-order-btn" type="submit">
-            Place Order
+          {error && (
+            <p className="checkout-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            className="place-order-btn"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Placing Order..." : "Place Order"}
           </button>
         </form>
 
