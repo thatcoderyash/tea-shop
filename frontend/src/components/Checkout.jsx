@@ -41,6 +41,8 @@ function Checkout({ onClose }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    console.log("CHECKOUT SUBMITTED");
+
     if (cart.length === 0) {
       setError("Your cart is empty. Please add some tea first.");
       return;
@@ -93,7 +95,7 @@ function Checkout({ onClose }) {
     } catch (err) {
       setError(
         err.message ||
-          "Could not connect to the server. Please check that the backend is running.",
+          "Something went wrong while placing your order. Please try again.",
       );
     } finally {
       setSubmitting(false);

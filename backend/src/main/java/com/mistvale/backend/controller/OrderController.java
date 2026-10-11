@@ -1,6 +1,7 @@
 package com.mistvale.backend.controller;
 
 import com.mistvale.backend.dto.CreateOrderRequest;
+import com.mistvale.backend.dto.OrderResponse;
 import com.mistvale.backend.entity.Order;
 import com.mistvale.backend.service.OrderService;
 import jakarta.validation.Valid;
@@ -20,12 +21,16 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Order createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        return orderService.createOrder(request);
+    public OrderResponse createOrder(
+            @Valid @RequestBody CreateOrderRequest request
+    ) {
+        Order order = orderService.createOrder(request);
+        return OrderResponse.from(order);
     }
 
     @GetMapping("/{id}")
-    public Order getOrder(@PathVariable Long id) {
-        return orderService.getOrder(id);
+    public OrderResponse getOrder(@PathVariable Long id) {
+        Order order = orderService.getOrder(id);
+        return OrderResponse.from(order);
     }
 }

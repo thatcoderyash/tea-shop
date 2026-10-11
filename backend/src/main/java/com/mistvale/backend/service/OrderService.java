@@ -57,10 +57,11 @@ public class OrderService {
                 );
             }
 
-            Product product = productRepository.findById(requestedItem.productId())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Product not found: " + requestedItem.productId()
-                    ));
+            Product product = productRepository.findByIdWithLock(
+                    requestedItem.productId()
+            ).orElseThrow(() -> new IllegalArgumentException(
+                    "Product not found: " + requestedItem.productId()
+            ));
 
             int quantity = requestedItem.quantity();
 
@@ -75,6 +76,10 @@ public class OrderService {
                         product.getName() + " does not have enough stock."
                 );
             }
+
+            // Deduct purchased quantity from inventory.
+            product.setStock(product.getStock() - quantity);
+            productRepository.save(product);
 
             double lineTotal = product.getPrice() * quantity;
             subtotal += lineTotal;
