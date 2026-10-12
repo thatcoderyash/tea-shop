@@ -23,8 +23,9 @@ function Checkout({ onClose }) {
   });
 
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [orderId, setOrderId] = useState(null);
+  const [orderDetails, setOrderDetails] = useState(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event) => {
@@ -35,13 +36,16 @@ function Checkout({ onClose }) {
       [name]: value,
     }));
 
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: "",
+    }));
+
     if (error) setError("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    console.log("CHECKOUT SUBMITTED");
 
     if (cart.length === 0) {
       setError("Your cart is empty. Please add some tea first.");
@@ -78,18 +82,52 @@ function Checkout({ onClose }) {
         body: JSON.stringify(orderRequest),
       });
 
-      const data = await response.json().catch(() => ({}));
+      let data;
 
-      if (!response.ok) {
+      try {
+        data = await response.json();
+      } catch {
         throw new Error(
-          data.detail ||
-            data.message ||
-            data.title ||
-            "Unable to place your order. Please try again.",
+          "The server returned an invalid response. Please try again.",
         );
       }
 
-      setOrderId(data.id);
+      if (!response.ok) {
+        if (data.details) {
+          const fieldNameMap = {
+            customerName: "name",
+            email: "email",
+            phone: "phone",
+            address: "address",
+            city: "city",
+            state: "state",
+            pincode: "pincode",
+          };
+
+          const mappedErrors = {};
+
+          Object.entries(data.details).forEach(([field, message]) => {
+            const inputName = fieldNameMap[field];
+
+            if (inputName) {
+              mappedErrors[inputName] = message;
+            }
+          });
+
+          setFieldErrors(mappedErrors);
+
+          if (Object.keys(mappedErrors).length > 0) {
+            setError("Please correct the highlighted fields.");
+            return;
+          }
+        }
+
+        throw new Error(
+          data.message || "Unable to place your order. Please try again.",
+        );
+      }
+
+      setOrderDetails(data);
       setOrderPlaced(true);
       clearCart();
     } catch (err) {
@@ -109,14 +147,68 @@ function Checkout({ onClose }) {
           <div className="success-icon">✓</div>
 
           <h1>Order Placed!</h1>
-
           <p>Thank you for shopping with Mistvale Tea Co.</p>
+          <p>Your tea journey is officially brewing. 🌿</p>
 
-          <p>Your order has been received successfully.</p>
+          {orderDetails && (
+            <div className="order-confirmation">
+              <h2>Order #{orderDetails.id}</h2>
 
-          {orderId && <p>Order number: #{orderId}</p>}
+              {orderDetails?.trackingToken && (
+                <div>
+                  <p>
+                    Tracking token:{" "}
+                    <strong>{orderDetails.trackingToken}</strong>
+                  </p>
+                  <p>Save this token to look up your order later.</p>
+                </div>
+              )}
 
-          <button onClick={onClose}>Continue Shopping</button>
+              {orderDetails.createdAt && (
+                <p>
+                  Placed on:{" "}
+                  {new Date(orderDetails.createdAt).toLocaleString("en-IN")}
+                </p>
+              )}
+
+              <div className="confirmation-items">
+                {orderDetails.items?.map((item) => (
+                  <div className="confirmation-item" key={item.productId}>
+                    <span>
+                      {item.productName} × {item.quantity}
+                    </span>
+                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="confirmation-totals">
+                <div>
+                  <span>Subtotal</span>
+                  <span>₹{orderDetails.subtotal.toFixed(2)}</span>
+                </div>
+
+                <div>
+                  <span>Discount</span>
+                  <span>-₹{orderDetails.discount.toFixed(2)}</span>
+                </div>
+
+                <div>
+                  <span>Shipping</span>
+                  <span>₹{orderDetails.shipping.toFixed(2)}</span>
+                </div>
+
+                <div className="confirmation-total">
+                  <strong>Total Paid</strong>
+                  <strong>₹{orderDetails.total.toFixed(2)}</strong>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button className="continue-shopping-btn" onClick={onClose}>
+            Continue Shopping
+          </button>
         </div>
       </div>
     );
@@ -148,6 +240,11 @@ function Checkout({ onClose }) {
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.name && (
+                <p className="field-error" role="alert">
+                  {fieldErrors.name}
+                </p>
+              )}
             </div>
 
             <div className="form-row">
@@ -162,6 +259,11 @@ function Checkout({ onClose }) {
                   onChange={handleChange}
                   required
                 />
+                {fieldErrors.email && (
+                  <p className="field-error" role="alert">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
 
               <div className="form-group">
@@ -175,6 +277,11 @@ function Checkout({ onClose }) {
                   onChange={handleChange}
                   required
                 />
+                {fieldErrors.phone && (
+                  <p className="field-error" role="alert">
+                    {fieldErrors.phone}
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -193,6 +300,11 @@ function Checkout({ onClose }) {
                 rows="3"
                 required
               />
+              {fieldErrors.address && (
+                <p className="field-error" role="alert">
+                  {fieldErrors.address}
+                </p>
+              )}
             </div>
 
             <div className="form-row">
@@ -207,6 +319,11 @@ function Checkout({ onClose }) {
                   onChange={handleChange}
                   required
                 />
+                {fieldErrors.city && (
+                  <p className="field-error" role="alert">
+                    {fieldErrors.city}
+                  </p>
+                )}
               </div>
 
               <div className="form-group">
@@ -220,6 +337,11 @@ function Checkout({ onClose }) {
                   onChange={handleChange}
                   required
                 />
+                {fieldErrors.state && (
+                  <p className="field-error" role="alert">
+                    {fieldErrors.state}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -236,6 +358,11 @@ function Checkout({ onClose }) {
                 onChange={handleChange}
                 required
               />
+              {fieldErrors.pincode && (
+                <p className="field-error" role="alert">
+                  {fieldErrors.pincode}
+                </p>
+              )}
             </div>
           </section>
 

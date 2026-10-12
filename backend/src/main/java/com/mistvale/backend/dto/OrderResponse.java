@@ -7,8 +7,7 @@ import java.util.List;
 
 public record OrderResponse(
         Long id,
-        String customerName,
-        String email,
+        String trackingToken,
         double subtotal,
         double discount,
         double shipping,
@@ -29,8 +28,7 @@ public record OrderResponse(
 
         return new OrderResponse(
                 order.getId(),
-                order.getCustomerName(),
-                order.getEmail(),
+                order.getTrackingToken(),
                 order.getSubtotal(),
                 order.getDiscount(),
                 order.getShipping(),
@@ -45,5 +43,6 @@ public record OrderResponse(
             String productName,
             double price,
             int quantity
-    ) {}
+    ) {
+    }
 }

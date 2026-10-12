@@ -10,7 +10,6 @@ import com.mistvale.backend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,13 +25,36 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
-    public OrderService(
-            OrderRepository orderRepository,
-            ProductRepository productRepository
-    ) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
     }
+
+
+    @Transactional
+    public Order getOrderForTracking(Long id, String token) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Order not found.")
+                );
+
+        if (order.getTrackingToken() == null
+                || !java.security.MessageDigest.isEqual(
+                order.getTrackingToken().getBytes(
+                        java.nio.charset.StandardCharsets.UTF_8
+                ),
+                token.getBytes(
+                        java.nio.charset.StandardCharsets.UTF_8
+                )
+        )) {
+            throw new IllegalArgumentException(
+                    "Invalid order number or tracking token."
+            );
+        }
+
+        return order;
+    }
+
 
     @Transactional
     public Order createOrder(CreateOrderRequest request) {
@@ -52,29 +74,19 @@ public class OrderService {
 
         for (OrderItemRequest requestedItem : request.items()) {
             if (!seenProductIds.add(requestedItem.productId())) {
-                throw new IllegalArgumentException(
-                        "Each product must appear only once in the order."
-                );
+                throw new IllegalArgumentException("Each product must appear only once in the order.");
             }
 
-            Product product = productRepository.findByIdWithLock(
-                    requestedItem.productId()
-            ).orElseThrow(() -> new IllegalArgumentException(
-                    "Product not found: " + requestedItem.productId()
-            ));
+            Product product = productRepository.findByIdWithLock(requestedItem.productId()).orElseThrow(() -> new IllegalArgumentException("Product not found: " + requestedItem.productId()));
 
             int quantity = requestedItem.quantity();
 
             if (quantity > 5) {
-                throw new IllegalArgumentException(
-                        "Maximum quantity per product is 5."
-                );
+                throw new IllegalArgumentException("Maximum quantity per product is 5.");
             }
 
             if (product.getStock() < quantity) {
-                throw new IllegalArgumentException(
-                        product.getName() + " does not have enough stock."
-                );
+                throw new IllegalArgumentException(product.getName() + " does not have enough stock.");
             }
 
             // Deduct purchased quantity from inventory.
@@ -99,9 +111,8 @@ public class OrderService {
         }
 
         double discount = 0;
-        String coupon = request.couponCode() == null
-                ? ""
-                : request.couponCode().trim();
+        String coupon = request.couponCode() == null ? "" : request.couponCode().trim();
+
 
         if (!coupon.isEmpty()) {
             if (!"WELCOME10".equalsIgnoreCase(coupon)) {
@@ -109,27 +120,18 @@ public class OrderService {
             }
 
             if (subtotal < COUPON_MIN_SUBTOTAL) {
-                throw new IllegalArgumentException(
-                        "WELCOME10 requires a minimum subtotal of ₹399."
-                );
+                throw new IllegalArgumentException("WELCOME10 requires a minimum subtotal of ₹399.");
             }
 
             if (eligibleSubtotal <= 0) {
-                throw new IllegalArgumentException(
-                        "WELCOME10 cannot be used on gift products."
-                );
+                throw new IllegalArgumentException("WELCOME10 cannot be used on gift products.");
             }
 
-            discount = Math.min(
-                    Math.round(eligibleSubtotal * COUPON_RATE * 100.0) / 100.0,
-                    COUPON_MAX_DISCOUNT
-            );
+            discount = Math.min(Math.round(eligibleSubtotal * COUPON_RATE * 100.0) / 100.0, COUPON_MAX_DISCOUNT);
         }
 
         double discountedSubtotal = subtotal - discount;
-        double shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD
-                ? 0
-                : SHIPPING_FEE;
+        double shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
 
         order.setSubtotal(subtotal);
         order.setDiscount(discount);
@@ -140,9 +142,6 @@ public class OrderService {
     }
 
     public Order getOrder(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Order not found: " + id
-                ));
+        return orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
     }
 }

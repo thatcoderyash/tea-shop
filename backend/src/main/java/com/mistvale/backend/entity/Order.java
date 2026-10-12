@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -52,6 +53,14 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private OrderStatus status = OrderStatus.PLACED;
+
+    @Column(unique = true, length = 36)
+    private String trackingToken;
+
+
     @OneToMany(
             mappedBy = "order",
             cascade = CascadeType.ALL,
@@ -59,20 +68,18 @@ public class Order {
     )
     private java.util.List<OrderItem> items = new java.util.ArrayList<>();
 
-    public java.util.List<OrderItem> getItems() {
-        return items;
-    }
-
-    public void setItems(java.util.List<OrderItem> items) {
-        this.items = items;
-    }
-
     public Order() {
     }
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (trackingToken == null) {
+            trackingToken = UUID.randomUUID().toString();
+        }
     }
 
 }

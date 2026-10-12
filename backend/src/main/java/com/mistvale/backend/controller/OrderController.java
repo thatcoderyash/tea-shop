@@ -1,7 +1,9 @@
+
 package com.mistvale.backend.controller;
 
 import com.mistvale.backend.dto.CreateOrderRequest;
 import com.mistvale.backend.dto.OrderResponse;
+import com.mistvale.backend.dto.OrderTrackingResponse;
 import com.mistvale.backend.entity.Order;
 import com.mistvale.backend.service.OrderService;
 import jakarta.validation.Valid;
@@ -24,13 +26,15 @@ public class OrderController {
     public OrderResponse createOrder(
             @Valid @RequestBody CreateOrderRequest request
     ) {
-        Order order = orderService.createOrder(request);
-        return OrderResponse.from(order);
+        return OrderResponse.from(orderService.createOrder(request));
     }
 
     @GetMapping("/{id}")
-    public OrderResponse getOrder(@PathVariable Long id) {
-        Order order = orderService.getOrder(id);
-        return OrderResponse.from(order);
+    public OrderTrackingResponse getOrder(
+            @PathVariable Long id,
+            @RequestParam String token
+    ) {
+        Order order = orderService.getOrderForTracking(id, token);
+        return OrderTrackingResponse.from(order);
     }
 }

@@ -641,6 +641,125 @@ textarea {
   transform: scale(1.04);
 }
 
+.field-error {
+  color: #b42318;
+  font-size: 0.85rem;
+  margin: 6px 0 0;
+}
+
+.checkout-error {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  padding: 12px;
+  white-space: pre-line;
+}
+
+.order-confirmation {
+  width: 100%;
+  max-width: 520px;
+  margin: 28px auto;
+  padding: 24px;
+  text-align: left;
+  background: #f6f1e7;
+  border: 1px solid #ebe2cf;
+  border-radius: 12px;
+  color: #1f3d2b;
+}
+
+.order-confirmation h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.confirmation-items,
+.confirmation-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.confirmation-item,
+.confirmation-totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.confirmation-item {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ebe2cf;
+}
+
+.confirmation-total {
+  padding-top: 14px;
+  border-top: 1px solid #1f3d2b;
+  font-size: 1.1rem;
+}
+
+/* =========================
+   ORDER LOOKUP
+========================= */
+
+.order-lookup {
+  max-width: 560px;
+  margin: 60px auto;
+  padding: 28px;
+  background: #f6f1e7;
+  color: #1f3d2b;
+  border: 1px solid #ebe2cf;
+  border-radius: 12px;
+}
+
+.order-lookup form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-lookup input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #c9c0ac;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.order-lookup button {
+  margin-top: 8px;
+  padding: 12px;
+  background: #1f3d2b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lookup-result {
+  margin-top: 24px;
+}
+
+.order-status {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: #e4eadf;
+  color: #1f3d2b;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.status-delivered {
+  background: #dcefe1;
+}
+
+.status-cancelled {
+  background: #fbe4e4;
+  color: #8b2424;
+}
+
 /* =========================
    PRODUCT INFORMATION
 ========================= */

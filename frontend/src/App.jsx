@@ -12,6 +12,7 @@ import ReviewsSection from "./components/ReviewsSection";
 import FAQSection from "./components/FAQSection";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
+import OrderLookup from "./components/OrderLookup";
 
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -50,6 +51,8 @@ function App() {
           <FAQSection />
 
           <Newsletter />
+
+          <OrderLookup />
 
           <Footer />
 
