@@ -1,0 +1,267 @@
+.admin-page {
+  min-height: 100vh;
+  padding: 40px;
+  background: #f6f1e7;
+  color: #1f3d2b;
+  font-family: Inter, sans-serif;
+  box-sizing: border-box;
+}
+
+.admin-page * {
+  box-sizing: border-box;
+}
+
+.admin-header,
+.admin-orders-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-header h1,
+.admin-login h1 {
+  margin: 4px 0 8px;
+  font-family: Fraunces, Georgia, serif;
+}
+
+.admin-eyebrow {
+  color: #4f7942;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.admin-muted {
+  color: #6e756a;
+  font-size: 0.9rem;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 32px 0;
+}
+
+.admin-stat,
+.admin-orders,
+.admin-login {
+  background: #fffdf8;
+  border: 1px solid #ebe2cf;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.admin-stat span,
+.admin-stat strong {
+  display: block;
+}
+
+.admin-stat span {
+  color: #6e756a;
+  font-size: 0.85rem;
+}
+
+.admin-stat strong {
+  margin-top: 12px;
+  font-size: 1.7rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-orders h2 {
+  margin-bottom: 4px;
+  font-family: Fraunces, Georgia, serif;
+}
+
+.admin-primary,
+.admin-secondary,
+.admin-filters button {
+  padding: 10px 15px;
+  border-radius: 7px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-primary {
+  width: 100%;
+  margin-top: 12px;
+  border: 0;
+  background: #1f3d2b;
+  color: white;
+}
+
+.admin-secondary {
+  background: transparent;
+  border: 1px solid #c9c0ac;
+  color: #1f3d2b;
+}
+
+.admin-primary:disabled,
+.admin-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.admin-filters button {
+  border: 1px solid #d9d0bd;
+  background: transparent;
+  color: #1f3d2b;
+  font-size: 0.82rem;
+}
+
+.admin-filters button.active {
+  background: #1f3d2b;
+  border-color: #1f3d2b;
+  color: white;
+}
+
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 15px 12px;
+  border-bottom: 1px solid #ebe2cf;
+  vertical-align: middle;
+}
+
+.admin-table th {
+  color: #6e756a;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-table td strong,
+.admin-table td small {
+  display: block;
+}
+
+.admin-table td small {
+  margin-top: 5px;
+  color: #777d72;
+  overflow-wrap: anywhere;
+}
+
+.admin-table select,
+.admin-login input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c9c0ac;
+  border-radius: 7px;
+  background: #fffdf8;
+  color: #1f3d2b;
+}
+
+.admin-status {
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 20px;
+  background: #e9eadc;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.status-delivered {
+  background: #dcefe1;
+}
+
+.status-cancelled {
+  background: #fbe4e4;
+  color: #8b2424;
+}
+
+.status-shipped {
+  background: #dfeafa;
+}
+
+.admin-empty {
+  padding: 28px 0;
+  color: #6e756a;
+  text-align: center;
+}
+
+.admin-error,
+.admin-notice {
+  margin: 18px 0;
+  padding: 12px 15px;
+  border-radius: 8px;
+}
+
+.admin-error {
+  background: #fbe4e4;
+  color: #8b2424;
+}
+
+.admin-notice {
+  background: #dcefe1;
+  color: #1f3d2b;
+}
+
+.admin-login {
+  width: 100%;
+  max-width: 420px;
+  margin: 8vh auto;
+}
+
+.admin-login label {
+  display: block;
+  margin: 18px 0 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.admin-brand {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1f3d2b;
+  color: #f6f1e7;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.6rem;
+}
+
+@media (max-width: 800px) {
+  .admin-page {
+    padding: 20px 14px;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-orders-heading {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header {
+    align-items: flex-start;
+  }
+
+  .admin-stat,
+  .admin-orders,
+  .admin-login {
+    padding: 17px;
+  }
+}

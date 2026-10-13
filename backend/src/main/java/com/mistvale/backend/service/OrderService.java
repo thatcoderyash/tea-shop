@@ -4,13 +4,16 @@ import com.mistvale.backend.dto.CreateOrderRequest;
 import com.mistvale.backend.dto.OrderItemRequest;
 import com.mistvale.backend.entity.Order;
 import com.mistvale.backend.entity.OrderItem;
+import com.mistvale.backend.entity.OrderStatus;
 import com.mistvale.backend.entity.Product;
 import com.mistvale.backend.repository.OrderRepository;
 import com.mistvale.backend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -32,24 +35,45 @@ public class OrderService {
 
 
     @Transactional
-    public Order getOrderForTracking(Long id, String token) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Order not found.")
-                );
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
 
-        if (order.getTrackingToken() == null
-                || !java.security.MessageDigest.isEqual(
-                order.getTrackingToken().getBytes(
-                        java.nio.charset.StandardCharsets.UTF_8
-                ),
-                token.getBytes(
-                        java.nio.charset.StandardCharsets.UTF_8
-                )
-        )) {
-            throw new IllegalArgumentException(
-                    "Invalid order number or tracking token."
-            );
+    @Transactional
+    public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order not found."));
+
+        OrderStatus currentStatus = order.getStatus();
+
+        if (currentStatus == newStatus) {
+            return order;
+        }
+
+        boolean allowed = switch (currentStatus) {
+            case PLACED -> newStatus == OrderStatus.PROCESSING || newStatus == OrderStatus.CANCELLED;
+
+            case PROCESSING -> newStatus == OrderStatus.SHIPPED || newStatus == OrderStatus.CANCELLED;
+
+            case SHIPPED -> newStatus == OrderStatus.DELIVERED;
+
+            case DELIVERED, CANCELLED -> false;
+        };
+
+        if (!allowed) {
+            throw new IllegalArgumentException("Cannot change order status from " + currentStatus + " to " + newStatus + ".");
+        }
+
+        order.setStatus(newStatus);
+        return orderRepository.save(order);
+    }
+
+
+    @Transactional
+    public Order getOrderForTracking(Long id, String token) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found."));
+
+        if (order.getTrackingToken() == null || !java.security.MessageDigest.isEqual(order.getTrackingToken().getBytes(java.nio.charset.StandardCharsets.UTF_8), token.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
+            throw new IllegalArgumentException("Invalid order number or tracking token.");
         }
 
         return order;

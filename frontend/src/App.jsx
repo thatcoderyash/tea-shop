@@ -13,10 +13,12 @@ import FAQSection from "./components/FAQSection";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
 import OrderLookup from "./components/OrderLookup";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
 
   const openCheckout = () => {
     setCartOpen(false);
@@ -27,12 +29,19 @@ function App() {
     setCheckoutOpen(false);
   };
 
+  if (adminOpen) {
+    return <AdminDashboard onLogout={() => setAdminOpen(false)} />;
+  }
+
   return (
     <>
       <Navbar
         onCartClick={() => setCartOpen(true)}
         checkoutOpen={checkoutOpen}
       />
+      <button type="button" onClick={() => setAdminOpen(true)}>
+        Admin Portal
+      </button>
 
       {!checkoutOpen ? (
         <>
