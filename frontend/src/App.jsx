@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -15,22 +15,41 @@ import Footer from "./components/Footer";
 import OrderLookup from "./components/OrderLookup";
 import AdminDashboard from "./components/AdminDashboard";
 
+const isAdminPath = (pathname) => pathname.replace(/\/+$/, "") === "/admin";
+
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [adminRoute, setAdminRoute] = useState(() =>
+    isAdminPath(window.location.pathname),
+  );
+
+  useEffect(() => {
+    const syncRoute = () =>
+      setAdminRoute(isAdminPath(window.location.pathname));
+    window.addEventListener("popstate", syncRoute);
+    return () => window.removeEventListener("popstate", syncRoute);
+  }, []);
+
+  const navigate = (path) => {
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, "", path);
+    }
+    setAdminRoute(isAdminPath(window.location.pathname));
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
 
   const openCheckout = () => {
     setCartOpen(false);
     setCheckoutOpen(true);
   };
 
-  const closeCheckout = () => {
-    setCheckoutOpen(false);
-  };
+  const closeCheckout = () => setCheckoutOpen(false);
 
-  if (adminOpen) {
-    return <AdminDashboard onLogout={() => setAdminOpen(false)} />;
+  // The admin dashboard is available only at /admin, not through the storefront UI.
+  if (adminRoute) {
+    return <AdminDashboard onLogout={() => navigate("/")} />;
   }
 
   return (
@@ -38,33 +57,22 @@ function App() {
       <Navbar
         onCartClick={() => setCartOpen(true)}
         checkoutOpen={checkoutOpen}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
-      <button type="button" onClick={() => setAdminOpen(true)}>
-        Admin Portal
-      </button>
 
       {!checkoutOpen ? (
         <>
           <Hero />
-
           <TrustStrip />
-
           <PromoStrip />
-
-          <ProductSection />
-
+          <ProductSection searchTerm={searchTerm} />
           <AboutSection />
-
           <ReviewsSection />
-
           <FAQSection />
-
           <Newsletter />
-
           <OrderLookup />
-
           <Footer />
-
           <CartDrawer
             isOpen={cartOpen}
             onClose={() => setCartOpen(false)}

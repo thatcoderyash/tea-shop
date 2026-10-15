@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 
-function Navbar({ onCartClick, checkoutOpen }) {
+function Navbar({ onCartClick, checkoutOpen, searchTerm, onSearchChange }) {
   const { cartCount } = useCart();
   const [activeSection, setActiveSection] = useState("home");
 
@@ -100,12 +100,22 @@ function Navbar({ onCartClick, checkoutOpen }) {
         <div className="header-actions">
           <form
             className="search-form"
-            onSubmit={(event) => event.preventDefault()}
+            role="search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              document.getElementById("shop")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
           >
             <input
               className="search"
               type="search"
               placeholder="Search teas..."
+              aria-label="Search teas"
+              value={searchTerm}
+              onChange={(event) => onSearchChange(event.target.value)}
             />
           </form>
 

@@ -1504,3 +1504,49 @@
     font-size: 0.82rem;
   }
 }
+
+/* Hidden admin entrance polish */
+.admin-page {
+  background: radial-gradient(
+    ellipse at top left,
+    #e7eddf 0%,
+    #f6f1e7 48%,
+    #eee5d3 100%
+  );
+}
+.admin-login {
+  position: relative;
+  overflow: hidden;
+}
+.admin-login::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, #1f3d2b, #4f7942, #d9962b);
+}
+.admin-login .admin-eyebrow {
+  margin-top: 18px;
+}
+.admin-login-divider {
+  height: 1px;
+  margin: 24px 0 10px;
+  background: #ebe2cf;
+}
+.admin-storefront-link {
+  display: block;
+  margin-top: 20px;
+  color: #4f7942;
+  font-size: 0.9rem;
+  text-align: center;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+.admin-storefront-link:hover {
+  color: #1f3d2b;
+  text-decoration: underline;
+}
+.admin-login button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}

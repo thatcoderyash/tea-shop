@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../admin.css";
 
-const ORDERS_API = "http://localhost:8080/api/admin/orders";
-const PRODUCTS_API = "http://localhost:8080/api/products";
+const API_BASE = "http://localhost:8080";
+const AUTH_API = `${API_BASE}/api/auth/login`;
+const ORDERS_API = `${API_BASE}/api/admin/orders`;
+const PRODUCTS_API = `${API_BASE}/api/products`;
 const STATUSES = ["PLACED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
 const LOW_STOCK_THRESHOLD = 5;
 const EMPTY_PRODUCT = {
@@ -36,6 +38,7 @@ function errorMessage(data) {
 function AdminDashboard({ onLogout }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
   const [credentials, setCredentials] = useState(null);
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -56,23 +59,40 @@ function AdminDashboard({ onLogout }) {
 
   const request = useCallback(
     async (url, options = {}) => {
-      if (!credentials) throw new Error("Please sign in again.");
+      if (!credentials?.accessToken) {
+        throw new Error("Please sign in again.");
+      }
+
       const response = await fetch(url, {
         ...options,
         headers: {
-          Authorization: `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`,
+          Authorization: `Bearer ${credentials.accessToken}`,
           "Content-Type": "application/json",
           ...options.headers,
         },
       });
-      if (response.status === 401 || response.status === 403) {
-        throw new Error(
-          response.status === 401
-            ? "Admin credentials are invalid. Please log in again."
-            : "You do not have permission to perform this action.",
-        );
-      }
+
       const data = await response.json().catch(() => null);
+
+      if (response.status === 401) {
+        setCredentials(null);
+        setOrders([]);
+        setProducts([]);
+        const authError = new Error(
+          "Your admin session has expired. Please sign in again.",
+        );
+        authError.status = 401;
+        throw authError;
+      }
+
+      if (response.status === 403) {
+        const permissionError = new Error(
+          "You do not have permission to perform this action.",
+        );
+        permissionError.status = 403;
+        throw permissionError;
+      }
+
       if (!response.ok) throw new Error(errorMessage(data));
       return data;
     },
@@ -122,7 +142,7 @@ function AdminDashboard({ onLogout }) {
     if (!confirmed) return;
 
     try {
-      await request(`/api/products/${product.id}`, {
+      await request(`${PRODUCTS_API}/${product.id}`, {
         method: "DELETE",
       });
 
@@ -158,20 +178,40 @@ function AdminDashboard({ onLogout }) {
     event.preventDefault();
     setError("");
     setNotice("");
-    const candidate = { username: username.trim(), password };
+    setLoggingIn(true);
+
     try {
-      const response = await fetch(ORDERS_API, {
-        headers: {
-          Authorization: `Basic ${btoa(`${candidate.username}:${candidate.password}`)}`,
-        },
+      const response = await fetch(AUTH_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          password,
+        }),
       });
-      if (response.status === 401)
+
+      const data = await response.json().catch(() => null);
+
+      if (response.status === 401) {
         throw new Error("Incorrect username or password.");
-      if (response.status === 403)
+      }
+      if (response.status === 403) {
         throw new Error("This account does not have admin permission.");
-      if (!response.ok) throw new Error("Could not connect to the admin API.");
-      setOrders(await response.json());
-      setCredentials(candidate);
+      }
+      if (!response.ok) {
+        throw new Error(errorMessage(data) || "Could not sign in.");
+      }
+      if (!data?.accessToken) {
+        throw new Error(
+          "Login succeeded but the server did not return an access token.",
+        );
+      }
+
+      // Keep the JWT in React memory only. It is not written to localStorage.
+      setCredentials({
+        accessToken: data.accessToken,
+        username: data.username ?? username.trim(),
+      });
       setPassword("");
     } catch (err) {
       setError(
@@ -179,6 +219,8 @@ function AdminDashboard({ onLogout }) {
           ? "Cannot reach the backend. Make sure Spring Boot is running."
           : err.message,
       );
+    } finally {
+      setLoggingIn(false);
     }
   };
 
@@ -325,7 +367,10 @@ function AdminDashboard({ onLogout }) {
           <div className="admin-brand">M</div>
           <p className="admin-eyebrow">MISTVALE TEA CO.</p>
           <h1>Admin Portal</h1>
-          <p className="admin-muted">Sign in to manage orders and products.</p>
+          <p className="admin-muted">
+            A quiet corner for managing your tea store.
+          </p>
+          <div className="admin-login-divider" aria-hidden="true" />
           {error && (
             <p className="admin-error" role="alert">
               {error}
@@ -348,9 +393,12 @@ function AdminDashboard({ onLogout }) {
             onChange={(event) => setPassword(event.target.value)}
             required
           />
-          <button className="admin-primary" type="submit">
-            Sign in
+          <button className="admin-primary" type="submit" disabled={loggingIn}>
+            {loggingIn ? "Signing in..." : "Sign in securely"}
           </button>
+          <a className="admin-storefront-link" href="/">
+            ← Return to the storefront
+          </a>
         </form>
       </main>
     );

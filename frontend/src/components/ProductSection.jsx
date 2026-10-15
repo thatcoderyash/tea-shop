@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 
-function ProductSection() {
+function ProductSection({ searchTerm = "" }) {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("featured");
 
   const [loading, setLoading] = useState(true);
@@ -34,15 +33,19 @@ function ProductSection() {
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
-      selectedCategory === "All" ||
-      product.category === selectedCategory;
+      selectedCategory === "All" || product.category === selectedCategory;
 
-    const search = searchTerm.toLowerCase();
+    const search = searchTerm.trim().toLowerCase();
+
+    const name = String(product.name ?? "").toLowerCase();
+    const description = String(product.description ?? "").toLowerCase();
+    const category = String(product.category ?? "").toLowerCase();
 
     const matchesSearch =
-      product.name.toLowerCase().includes(search) ||
-      product.description.toLowerCase().includes(search) ||
-      product.category.toLowerCase().includes(search);
+      !search ||
+      name.includes(search) ||
+      description.includes(search) ||
+      category.includes(search);
 
     return matchesCategory && matchesSearch;
   });
@@ -96,21 +99,10 @@ function ProductSection() {
       <div className="section-header">
         <p>OUR COLLECTION</p>
         <h2>Find Your Perfect Tea</h2>
-        <p>
-          Explore our carefully selected collection of premium teas.
-        </p>
+        <p>Explore our carefully selected collection of premium teas.</p>
       </div>
 
       <div className="product-toolbar">
-        <div className="product-search">
-          <input
-            type="text"
-            placeholder="Search teas..."
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </div>
-
         <div className="product-sort">
           <label htmlFor="sort-products">Sort by</label>
 
@@ -133,9 +125,7 @@ function ProductSection() {
           <button
             key={category}
             className={
-              selectedCategory === category
-                ? "filter-btn active"
-                : "filter-btn"
+              selectedCategory === category ? "filter-btn active" : "filter-btn"
             }
             onClick={() => setSelectedCategory(category)}
           >
@@ -147,10 +137,7 @@ function ProductSection() {
       {sortedProducts.length > 0 ? (
         <div className="products-grid">
           {sortedProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
