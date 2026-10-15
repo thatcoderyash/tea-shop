@@ -1,9 +1,9 @@
-
 package com.mistvale.backend.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,10 +35,15 @@ public class SecurityConfig {
                                 SessionCreationPolicy.STATELESS
                         )
                 )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )
+
                 .httpBasic(Customizer.withDefaults());
 
         return http.build();
@@ -71,7 +76,7 @@ public class SecurityConfig {
                 List.of("http://localhost:5173")
         );
         configuration.setAllowedMethods(
-                List.of("GET", "POST", "PATCH", "OPTIONS")
+                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
         configuration.setAllowedHeaders(
                 List.of("Authorization", "Content-Type")

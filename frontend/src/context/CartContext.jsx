@@ -2,10 +2,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 
+const FREE_SHIPPING_THRESHOLD = 599;
+const SHIPPING_FEE = 49;
+const COUPON_MIN_SUBTOTAL = 399;
+const COUPON_MAX_DISCOUNT = 150;
+
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem("mistvale-cart");
-
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
@@ -17,6 +21,7 @@ export function CartProvider({ children }) {
 
   const clearCart = () => {
     setCart([]);
+    setCoupon(null);
     localStorage.removeItem("mistvale-cart");
   };
 
@@ -29,21 +34,12 @@ export function CartProvider({ children }) {
       if (existingProduct) {
         return currentCart.map((item) =>
           item.id === product.id
-            ? {
-                ...item,
-                quantity: item.quantity + 1,
-              }
+            ? { ...item, quantity: item.quantity + 1 }
             : item,
         );
       }
 
-      return [
-        ...currentCart,
-        {
-          ...product,
-          quantity: 1,
-        },
-      ];
+      return [...currentCart, { ...product, quantity: 1 }];
     });
   };
 
@@ -56,12 +52,7 @@ export function CartProvider({ children }) {
   const increaseQuantity = (productId) => {
     setCart((currentCart) =>
       currentCart.map((item) =>
-        item.id === productId
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item,
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item,
       ),
     );
   };
@@ -71,53 +62,11 @@ export function CartProvider({ children }) {
       currentCart
         .map((item) =>
           item.id === productId
-            ? {
-                ...item,
-                quantity: item.quantity - 1,
-              }
+            ? { ...item, quantity: item.quantity - 1 }
             : item,
         )
         .filter((item) => item.quantity > 0),
     );
-  };
-
-  const applyCoupon = (code) => {
-    const normalizedCode = code.trim().toUpperCase();
-
-    if (normalizedCode === "MISTVALE10") {
-      setCoupon({
-        code: normalizedCode,
-        type: "percentage",
-        value: 10,
-      });
-
-      return {
-        success: true,
-        message: "10% discount applied!",
-      };
-    }
-
-    if (normalizedCode === "TEA50") {
-      setCoupon({
-        code: normalizedCode,
-        type: "fixed",
-        value: 50,
-      });
-
-      return {
-        success: true,
-        message: "₹50 discount applied!",
-      };
-    }
-
-    return {
-      success: false,
-      message: "Invalid coupon code.",
-    };
-  };
-
-  const removeCoupon = () => {
-    setCoupon(null);
   };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -127,21 +76,60 @@ export function CartProvider({ children }) {
     0,
   );
 
+  // Gift products do not qualify for the coupon discount.
+  const eligibleSubtotal = cart.reduce(
+    (total, item) =>
+      item.category === "Gifts" ? total : total + item.price * item.quantity,
+    0,
+  );
+
+  const applyCoupon = (code) => {
+    const normalizedCode = code.trim().toUpperCase();
+
+    if (normalizedCode !== "WELCOME10") {
+      return {
+        success: false,
+        message: "Invalid coupon code.",
+      };
+    }
+
+    if (eligibleSubtotal < COUPON_MIN_SUBTOTAL) {
+      return {
+        success: false,
+        message:
+          "Add at least ₹399 in eligible tea products to use this coupon.",
+      };
+    }
+
+    setCoupon({ code: normalizedCode });
+
+    return {
+      success: true,
+      message: "WELCOME10 applied! You saved 10% on eligible products.",
+    };
+  };
+
+  const removeCoupon = () => setCoupon(null);
+
   let discount = 0;
 
-  if (coupon) {
-    if (coupon.type === "percentage") {
-      discount = Math.round((cartTotal * coupon.value) / 100);
-    }
-
-    if (coupon.type === "fixed") {
-      discount = Math.min(coupon.value, cartTotal);
-    }
+  if (coupon?.code === "WELCOME10" && eligibleSubtotal >= COUPON_MIN_SUBTOTAL) {
+    discount = Math.min(
+      Math.round(eligibleSubtotal * 0.1 * 100) / 100,
+      COUPON_MAX_DISCOUNT,
+    );
   }
 
-  const shippingCost = cartTotal === 0 ? 0 : cartTotal >= 999 ? 0 : 99;
+  const discountedSubtotal = cartTotal - discount;
 
-  const finalTotal = cartTotal + shippingCost - discount;
+  const shippingCost =
+    cartTotal === 0
+      ? 0
+      : discountedSubtotal >= FREE_SHIPPING_THRESHOLD
+        ? 0
+        : SHIPPING_FEE;
+
+  const finalTotal = discountedSubtotal + shippingCost;
 
   return (
     <CartContext.Provider
@@ -153,6 +141,8 @@ export function CartProvider({ children }) {
         decreaseQuantity,
         cartCount,
         cartTotal,
+        eligibleSubtotal,
+        discountedSubtotal,
         shippingCost,
         coupon,
         discount,
