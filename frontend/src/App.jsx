@@ -32,6 +32,16 @@ function App() {
     return () => window.removeEventListener("popstate", syncRoute);
   }, []);
 
+  useEffect(() => {
+    const isAdmin = location.pathname === "/admin";
+
+    document.body.style.paddingTop = isAdmin ? "0" : "";
+
+    return () => {
+      document.body.style.paddingTop = "";
+    };
+  }, [location.pathname]);
+
   const navigate = (path) => {
     if (window.location.pathname !== path) {
       window.history.pushState({}, "", path);
