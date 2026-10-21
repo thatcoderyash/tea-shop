@@ -14,6 +14,9 @@ import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
 import OrderLookup from "./components/OrderLookup";
 import AdminDashboard from "./components/AdminDashboard";
+import CustomerLogin from "./components/CustomerLogin";
+import CustomerRegister from "./components/CustomerRegister";
+import CustomerAccount from "./components/CustomerAccount";
 
 const isAdminPath = (pathname) => pathname.replace(/\/+$/, "") === "/admin";
 
@@ -57,9 +60,22 @@ function App() {
 
   const closeCheckout = () => setCheckoutOpen(false);
 
-  // The admin dashboard is available only at /admin, not through the storefront UI.
+  // Admin dashboard
   if (adminRoute) {
     return <AdminDashboard onLogout={() => navigate("/")} />;
+  }
+
+  // Customer login page
+  if (window.location.pathname === "/login") {
+    return <CustomerLogin />;
+  }
+
+  if (window.location.pathname === "/register") {
+    return <CustomerRegister />;
+  }
+
+  if (window.location.pathname === "/account") {
+    return <CustomerAccount />;
   }
 
   return (

@@ -4,6 +4,9 @@ import { useCart } from "../context/CartContext";
 function Navbar({ onCartClick, checkoutOpen, searchTerm, onSearchChange }) {
   const { cartCount } = useCart();
   const [activeSection, setActiveSection] = useState("home");
+  const [customerLoggedIn, setCustomerLoggedIn] = useState(() =>
+    Boolean(localStorage.getItem("customer-token")),
+  );
 
   useEffect(() => {
     // Storefront sections are unmounted during checkout.
@@ -40,6 +43,18 @@ function Navbar({ onCartClick, checkoutOpen, searchTerm, onSearchChange }) {
       observer.disconnect();
     };
   }, [checkoutOpen]);
+
+  useEffect(() => {
+    const updateCustomerAuth = () => {
+      setCustomerLoggedIn(Boolean(localStorage.getItem("customer-token")));
+    };
+
+    window.addEventListener("customer-auth-change", updateCustomerAuth);
+
+    return () => {
+      window.removeEventListener("customer-auth-change", updateCustomerAuth);
+    };
+  }, []);
 
   const navItems = [
     {
@@ -127,6 +142,29 @@ function Navbar({ onCartClick, checkoutOpen, searchTerm, onSearchChange }) {
             🛒
             {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </button>
+          {customerLoggedIn ? (
+            <a className="account-link" href="/account">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+              </svg>
+            </a>
+          ) : (
+            <div className="auth-nav-links">
+              <a href="/login">Sign In</a>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -40,6 +40,11 @@ public class OrderService {
     }
 
     @Transactional
+    public List<Order> getCustomerOrders(String email) {
+        return orderRepository.findByEmailIgnoreCaseOrderByCreatedAtDesc(email);
+    }
+
+    @Transactional
     public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order not found."));
 
