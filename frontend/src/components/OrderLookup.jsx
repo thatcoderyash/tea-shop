@@ -1,4 +1,5 @@
 import { useState } from "react";
+import API_BASE_URL from "./api";
 
 function OrderLookup() {
   const [orderId, setOrderId] = useState("");
@@ -15,7 +16,7 @@ function OrderLookup() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/orders/${encodeURIComponent(orderId)}?token=${encodeURIComponent(token)}`,
+        `${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}?token=${encodeURIComponent(token)}`,
       );
 
       const data = await response.json();

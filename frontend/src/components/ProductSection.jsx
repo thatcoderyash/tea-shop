@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
+import API_BASE_URL from "./api";
 
 function ProductSection({ searchTerm = "" }) {
   const [products, setProducts] = useState([]);
@@ -12,7 +13,7 @@ function ProductSection({ searchTerm = "" }) {
   const categories = ["All", "Black", "Green", "Herbal", "Gifts"];
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/products")
+    fetch(`${API_BASE_URL}8080/api/products`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch products");

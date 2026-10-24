@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import API_BASE_URL from "./api";
 
 function CustomerAccount() {
   const [profile, setProfile] = useState(null);
@@ -29,10 +30,10 @@ function CustomerAccount() {
         };
 
         const [profileResponse, ordersResponse] = await Promise.all([
-          fetch("http://localhost:8080/api/customer/profile", {
+          fetch(`${API_BASE_URL}/api/customer/profile`, {
             headers,
           }),
-          fetch("http://localhost:8080/api/customer/orders", {
+          fetch(`${API_BASE_URL}/api/customer/orders`, {
             headers,
           }),
         ]);

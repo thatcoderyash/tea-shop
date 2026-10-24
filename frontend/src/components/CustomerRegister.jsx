@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import API_BASE_URL from "./api";
 
 function CustomerRegister() {
   const [name, setName] = useState("");
@@ -9,22 +10,22 @@ function CustomerRegister() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-  const token = localStorage.getItem("customer-token");
+    const token = localStorage.getItem("customer-token");
 
-  if (!token) {
-    return;
-  }
+    if (!token) {
+      return;
+    }
 
-  const params = new URLSearchParams(window.location.search);
-  const redirectTo = params.get("redirect");
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get("redirect");
 
-  const destination =
-    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
-      ? redirectTo
-      : "/";
+    const destination =
+      redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+        ? redirectTo
+        : "/";
 
-  window.location.replace(destination);
-}, []);
+    window.location.replace(destination);
+  }, []);
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -36,7 +37,7 @@ function CustomerRegister() {
     try {
       // Step 1: Create the customer account
       const registerResponse = await fetch(
-        "http://localhost:8080/api/auth/register",
+        `${API_BASE_URL}/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -57,19 +58,16 @@ function CustomerRegister() {
       }
 
       // Step 2: Log in using the newly created credentials
-      const loginResponse = await fetch(
-        "http://localhost:8080/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: email,
-            password,
-          }),
+      const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          username: email,
+          password,
+        }),
+      });
 
       const loginData = await loginResponse.json();
 

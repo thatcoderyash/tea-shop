@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../admin.css";
 import "../admin-sidebar.css";
+import API_BASE_URL from "./api";
 
-const API_BASE = "http://localhost:8080";
 const AUTH_API = `${API_BASE}/api/auth/login`;
 const ORDERS_API = `${API_BASE}/api/admin/orders`;
 const PRODUCTS_API = `${API_BASE}/api/products`;

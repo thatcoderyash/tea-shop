@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import API_BASE_URL from "./api";
 
 function CustomerLogin() {
   const [email, setEmail] = useState("");
@@ -16,14 +17,11 @@ function CustomerLogin() {
 
     const loadProfile = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:8080/api/customer/profile",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        const response = await fetch(`${API_BASE_URL}/api/customer/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
         if (response.status === 401 || response.status === 403) {
           localStorage.removeItem("customer-token");
@@ -64,7 +62,7 @@ function CustomerLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,7 +83,7 @@ function CustomerLogin() {
       window.dispatchEvent(new Event("customer-auth-change"));
 
       const profileResponse = await fetch(
-        "http://localhost:8080/api/customer/profile",
+        `${API_BASE_URL}/api/customer/profile`,
         {
           headers: {
             Authorization: `Bearer ${data.accessToken}`,
