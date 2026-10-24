@@ -13,7 +13,7 @@ function ProductSection({ searchTerm = "" }) {
   const categories = ["All", "Black", "Green", "Herbal", "Gifts"];
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}8080/api/products`)
+    fetch(`${API_BASE_URL}/api/products`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch products");
