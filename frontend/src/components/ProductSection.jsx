@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
-import API_BASE_URL from "./api";
+import API_BASE_URL from "../api";
 
 function ProductSection({ searchTerm = "" }) {
   const [products, setProducts] = useState([]);

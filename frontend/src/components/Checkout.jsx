@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
-import API_BASE_URL from "./api";
+import API_BASE_URL from "../api";
 
 function Checkout({ onClose }) {
   const {

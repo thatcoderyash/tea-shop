@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../admin.css";
 import "../admin-sidebar.css";
-import API_BASE_URL from "./api";
+import API_BASE_URL from "../api";
 
-const AUTH_API = `${API_BASE}/api/auth/login`;
-const ORDERS_API = `${API_BASE}/api/admin/orders`;
-const PRODUCTS_API = `${API_BASE}/api/products`;
+const AUTH_API = `${API_BASE_URL}/api/auth/login`;
+const ORDERS_API = `${API_BASE_URL}/api/admin/orders`;
+const PRODUCTS_API = `${API_BASE_URL}/api/products`;
 const STATUSES = ["PLACED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
 const LOW_STOCK_THRESHOLD = 5;
 const EMPTY_PRODUCT = {

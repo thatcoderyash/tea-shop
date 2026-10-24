@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API_BASE_URL from "./api";
+import API_BASE_URL from "../api";
 
 function CustomerAccount() {
   const [profile, setProfile] = useState(null);
