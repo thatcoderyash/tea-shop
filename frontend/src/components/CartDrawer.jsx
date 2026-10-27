@@ -9,7 +9,6 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
 
   const {
     cart,
-    cartCount,
     cartTotal,
     shippingCost,
     coupon,
@@ -151,50 +150,52 @@ const CartDrawer = ({ isOpen, onClose, onCheckout }) => {
 
                   <button onClick={checkPincode}>Check</button>
                 </div>
-
-                {pincodeMessage && (
-                  <p className="pincode-message">{pincodeMessage}</p>
-                )}
               </div>
+              {pincodeMessage && (
+                <p className="pincode-message">{pincodeMessage}</p>
+              )}
 
               <div className="coupon-section">
-                <h3>Have a coupon?</h3>
+                <>
+                  <h3>Have a coupon?</h3>
 
-                {!coupon ? (
-                  <>
-                    <div className="coupon-input">
-                      <input
-                        type="text"
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={(event) => setCouponCode(event.target.value)}
-                      />
-
-                      <button
-                        onClick={() => {
-                          const result = applyCoupon(couponCode);
-
-                          setCouponMessage(result.message);
-
-                          if (result.success) {
-                            setCouponCode("");
+                  {!coupon ? (
+                    <>
+                      <div className="coupon-input">
+                        <input
+                          type="text"
+                          placeholder="Enter coupon code"
+                          value={couponCode}
+                          onChange={(event) =>
+                            setCouponCode(event.target.value)
                           }
-                        }}
-                      >
-                        Apply
-                      </button>
+                        />
+
+                        <button
+                          onClick={() => {
+                            const result = applyCoupon(couponCode);
+
+                            setCouponMessage(result.message);
+
+                            if (result.success) {
+                              setCouponCode("");
+                            }
+                          }}
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="applied-coupon">
+                      <span>{coupon.code} applied</span>
+
+                      <button onClick={removeCoupon}>Remove</button>
                     </div>
-
-                    {couponMessage && (
-                      <p className="coupon-message">{couponMessage}</p>
-                    )}
-                  </>
-                ) : (
-                  <div className="applied-coupon">
-                    <span>{coupon.code} applied</span>
-
-                    <button onClick={removeCoupon}>Remove</button>
-                  </div>
+                  )}
+                </>
+                {couponMessage && (
+                  <p className="coupon-message">{couponMessage}</p>
                 )}
               </div>
 
